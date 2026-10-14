@@ -1,0 +1,64 @@
+# Kali Linux promo
+
+A 24.5-second cyberpunk motion-graphics spot for Kali Linux: real numbers, a 128 BPM darksynth track with an ElevenLabs voice-over, and an ending on the official Kali dragon and wordmark.
+
+It's a separate project from the Clawd kit. It reuses `render.mjs` to render it, but draws with Canvas 2D and a WebGL post-processing pass (bloom, chromatic aberration, block glitch, scanlines, grain) instead of p5.brush.
+
+## Build it
+
+You need Node.js, Chromium or Chrome, ffmpeg, and Python 3 with numpy and scipy.
+
+```bash
+npm install
+python3 projects/kali/audio/music.py            # soundtrack -> out/kali/mix.wav, timeline -> projects/kali/cues.js
+node render.mjs --page=projects/kali/kali.html --soft-gl --fps=30 --frames --frames-dir=out/kali/frames --workers=4
+node render.mjs --encode --fps=30 --frames-dir=out/kali/frames --audio=out/kali/mix.wav --crf=22 --out=out/kali/kali.mp4
+```
+
+Drop `--soft-gl` if your machine has a GPU. Open `projects/kali/kali.html` in Chrome to scrub through the video. Contact sheets work the same as for the kit, for example `node render.mjs --page=projects/kali/kali.html --soft-gl --sheet=3.9,13.3,21.5 --out=out/kali/check.jpg`.
+
+## How sound and picture stay in sync
+
+`audio/music.py` is the single source of timing. It synthesizes the track on a 128 BPM grid, places the voice lines and sound effects on that grid, and writes `cues.js`: the bars, every kick, the eight zaps under the tool names, the exact time of every spoken word (from ElevenLabs Scribe transcripts of the takes used) and the voice's loudness envelope at 60 Hz. `scenes.js` reads only those cues, so every slam, flash and word lands on its sound. The breakdown's waveform is drawn from the real whisper.
+
+| time | shot | voice-over |
+|---|---|---|
+| 0.00 | Kali root shell, ROOT ACCESS ... GRANTED | "Root access... granted." |
+| 3.75 | the drop: 600+ penetration testing tools | "Over 600 tools." |
+| 5.63 | eight flagship tools, one per eighth note | |
+| 7.50 | 2006 BackTrack, 2013 Kali 1.0, 2016 Kali Rolling, 2026 | |
+| 9.38 | built on Debian, rolling release, four releases a year | |
+| 11.25 | runs anywhere: the eight ways Kali ships | |
+| 13.13 | FREE, and always will be | "Free... and always will be." |
+| 16.88 | breakdown: the quote, word by word | "The quieter you become... the more you are able to hear." |
+| 20.63 | half a beat of silence | |
+| 21.09 | the hit: dragon, KALI, LINUX | "Kali Linux." |
+
+## Facts on screen
+
+- **600+ penetration testing tools**: Kali's own docs, [What is Kali Linux?](https://www.kali.org/docs/introduction/what-is-kali-linux/) ("More than 600 penetration testing tools included").
+- **Tool categories**: each of the eight tool cards uses the category Kali itself files it under, from its `kali-tools-*` metapackages in [kali-meta](https://gitlab.com/kalilinux/packages/kali-meta) (for example `wireshark` is in `kali-tools-sniffing-spoofing`, `radare2` in `kali-tools-reverse-engineering`). Every tool named on the scrolling wall and in the terminal ships in those metapackages.
+- **Lineage**: BackTrack v1 was released on 26 May 2006, Kali Linux 1.0 on 13 March 2013, and [Kali 2016.1](https://www.kali.org/blog/kali-linux-2016-1-release/), the first Kali Rolling release, on 21 January 2016.
+- **Debian-based, rolling, four point releases a year** (20xx.1 to 20xx.4): [kali.org releases](https://www.kali.org/releases/).
+- **Free, and always will be**: Kali's docs say it is completely free of charge and always will be. Older versions of the docs titled the section "Free (as in beer) and always will be".
+- **Platforms**: the eight tiles follow kali.org's [Get Kali](https://www.kali.org/get-kali/) page: installer, virtual machines, ARM, mobile (NetHunter), cloud, containers, live boot, WSL.
+- **"The quieter you become, the more you are able to hear."** BackTrack's tagline, which Kali carried on. The video says it but doesn't label it.
+- **"The most advanced Penetration Testing Distribution"** is Kali's own line.
+
+## Credits
+
+- Voice-over: ElevenLabs `eleven_v4`, voice "Titan - Cinematic Trailer Voice". Sound effects (impacts, riser, glitches, whooshes, typing): ElevenLabs Sound Effects v2. The takes used are in `audio/elevenlabs/`. Music: synthesized from scratch by `audio/music.py`.
+- Logo: `assets/logo/kali-logo.svg` is `kali-logos/logo.svg` from Kali's [kali-themes](https://gitlab.com/kalilinux/packages/kali-themes) package. The Kali name, dragon and logo are trademarks of OffSec. This is an unofficial fan piece.
+- Fonts: Orbitron, Chakra Petch and JetBrains Mono, under the SIL Open Font License (`fonts/OFL.txt`).
+
+## Files
+
+| path | what it is |
+|---|---|
+| `kali.html` | The page `render.mjs` drives, with a scrub bar when opened in a browser |
+| `scenes.js` | The shots, the HUD and the per-frame effect levels |
+| `engine.js` | Drawing helpers, the WebGL post-processing pass and the render hooks |
+| `cues.js` | Generated by `audio/music.py`: the soundtrack's timeline |
+| `logo.js` | The official logo's two paths (dragon and wordmark) |
+| `audio/music.py` | Synth, arrangement and mix |
+| `audio/elevenlabs/` | The voice and sound-effect takes used |
